@@ -5,6 +5,8 @@
 #include <sstream>
 #include <vector>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <filesystem>
 
 void splitString(std::string text, char d, std::vector<std::string>& result);
 void vectorOfStringsToArrayOfCharArrays(std::vector<std::string>& list, char ***result);
@@ -17,6 +19,7 @@ int main (int argc, char **argv)
     char* os_path = getenv("PATH");
     splitString(os_path, ':', os_path_list);
 
+<<<<<<< HEAD
     
     /************************************************************************************
      *   Example code - remove in actual program                                        *
@@ -24,6 +27,15 @@ int main (int argc, char **argv)
     // Shows how to loop over the directories in the PATH environment variable
     int i;
     for (i = 0; i < os_path_list.size(); i++)
+=======
+    //struct stat;
+    //std::filesystem
+    //-std=c++17
+    
+    // Example code for how to loop over NULL terminated list of strings
+    int i = 0;
+    while (os_path_list[i] != NULL)
+>>>>>>> got std::filesystem working
     {
         printf("PATH[%2d]: %s\n", i, os_path_list[i].c_str());
     }
@@ -34,9 +46,22 @@ int main (int argc, char **argv)
 
     // Welcome message
     printf("Welcome to OSShell! Please enter your commands ('exit' to quit).\n");
+<<<<<<< HEAD
 
     std::vector<std::string> command_list; // to store command user types in, split into its variour parameters
     char **command_list_exec; // command_list converted to an array of character arrays
+=======
+    std::system("ls");
+    namespace fs = std::filesystem;
+    std::cout << fs::exists("/home/abraunsc/CISC 310 - Assignments/os-osshell/src/osshell.cpp");
+    
+    // Allocate space for input command lists
+    // `command_list` supports up to 32 command line parameters, 
+    //     each with a parameter string length of up to 128 characters
+    char **command_list;
+    allocateArrayOfCharArrays(&command_list, 32, 128);
+
+>>>>>>> got std::filesystem working
     // Repeat:
     //  Print prompt for user input: "osshell> " (no newline)
     //  Get user input for next command
@@ -171,13 +196,74 @@ void vectorOfStringsToArrayOfCharArrays(std::vector<std::string>& list, char ***
 */
 void freeArrayOfCharArrays(char **array, size_t array_length)
 {
+    enum states { NONE, IN_WORD, IN_STRING } state = NONE;
+
     int i;
+<<<<<<< HEAD
     for (i = 0; i < array_length; i++)
+=======
+    std::vector<std::string> list;
+    std::string token;
+    for (i = 0; i < text.length(); i++)
+    {
+        char c = text[i];
+        switch (state) {
+            case NONE:
+                if (c != d)
+                {
+                    if (c == '\"')
+                    {
+                        state = IN_STRING;
+                        token = "";
+                    }
+                    else
+                    {
+                        state = IN_WORD;
+                        token = c;
+                    }
+                }
+                break;
+            case IN_WORD:
+                if (c == d)
+                {
+                    list.push_back(token);
+                    state = NONE;
+                }
+                else
+                {
+                    token += c;
+                }
+                break;
+            case IN_STRING:
+                if (c == '\"')
+                {
+                    list.push_back(token);
+                    state = NONE;
+                }
+                else
+                {
+                    token += c;
+                }
+                break;
+        }
+    }
+    if (state != NONE)
+    {
+        list.push_back(token);
+    }
+
+    for (i = 0; i < list.size(); i++)
+>>>>>>> got std::filesystem working
     {
         if (array[i] != NULL)
         {
             delete[] array[i];
         }
     }
+<<<<<<< HEAD
     delete[] array;
 }
+=======
+    result[list.size()] = NULL;
+}
+>>>>>>> got std::filesystem working
