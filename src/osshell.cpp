@@ -14,6 +14,8 @@ void freeArrayOfCharArrays(char **array, size_t array_length);
 
 int main (int argc, char **argv)
 {
+    //g++ -std=c++17 -o osshell osshell.cpp -lpthread
+
     // Get list of paths to binary executables
     std::vector<std::string> os_path_list;
     char* os_path = getenv("PATH");
@@ -53,8 +55,28 @@ int main (int argc, char **argv)
 =======
     std::system("ls");
     namespace fs = std::filesystem;
-    std::cout << fs::exists("/home/abraunsc/CISC 310 - Assignments/os-osshell/src/osshell.cpp");
-    
+    //std::cout << fs::exists("/home/abraunsc/CISC 310 - Assignments/os-osshell/src/osshell.cpp");
+    i=0;
+    bool isValid = false;
+    while (os_path_list[i] != NULL)
+    {
+        
+        std::string test = "/ls";
+        std::string path = os_path_list[i];
+        std::string lsPath = path + test;
+        std::cout << lsPath;
+        if (fs::exists(lsPath)==1)
+        {
+            isValid = true;
+        }
+        std::cout<<"\n";
+        i++;
+        
+    }
+    if (isValid)
+    {
+        printf("It works!\n");
+    }
     // Allocate space for input command lists
     // `command_list` supports up to 32 command line parameters, 
     //     each with a parameter string length of up to 128 characters
