@@ -24,11 +24,14 @@ int main (int argc, char **argv)
      *   Example code - remove in actual program                                        *
      ************************************************************************************/
     // Shows how to loop over the directories in the PATH environment variable
+    
     int i;
+    /*
     for (i = 0; i < os_path_list.size(); i++)
     {
         printf("PATH[%2d]: %s\n", i, os_path_list[i].c_str());
     }
+    */
     /************************************************************************************
      *   End example code                                                               *
      ************************************************************************************/
@@ -48,24 +51,43 @@ int main (int argc, char **argv)
     //   If yes, execute it
     //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
 
-    std::system("ls");
+    //std::system("ls");
     namespace fs = std::filesystem;
     
-    bool isValid = false;
-    for (i = 0; i < os_path_list.size(); i++)
+    while(true)
     {
-        std::string test = "/ls";
-        std::string path = os_path_list[i];
-        std::string lsPath = path + test;
-        if (fs::exists(lsPath)==1)
+        std::string command;
+        std::cout << "osshell> ";
+        std::getline(std::cin, command);
+        if(command.compare("exit") == 0)
         {
-            isValid = true;
+            break;
         }
+        bool isValid = false;
+        int j;
+        for (j = 0; j < os_path_list.size(); j++)
+        {   
+            std::string path = os_path_list[j];
+            std::string lsPath = path + "/" + command;
+            if (fs::exists(lsPath)==1)
+            {
+                isValid = true;
+            }
+        }
+        const char * commandConChar = command.c_str();
+        if (isValid)
+        {
+            std::system(commandConChar);
+        } 
+        else
+        {
+            std::cout << command;
+            std::cout << ": Error command not found\n";
+        }
+
     }
-    if (isValid)
-    {
-        printf("It works!\n");
-    }
+    
+    
     /************************************************************************************
      *   Example code - remove in actual program                                        *
      ************************************************************************************/
