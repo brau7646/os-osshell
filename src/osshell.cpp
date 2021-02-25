@@ -13,7 +13,8 @@ void vectorOfStringsToArrayOfCharArrays(std::vector<std::string>& list, char ***
 void freeArrayOfCharArrays(char **array, size_t array_length);
 
 int main (int argc, char **argv)
-{
+{   
+    //compile with: 'g++ -std=c++17 -o osshell osshell.cpp -lpthread'
     // Get list of paths to binary executables
     std::vector<std::string> os_path_list;
     char* os_path = getenv("PATH");
