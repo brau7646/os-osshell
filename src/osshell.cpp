@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <filesystem>
+#include <sys/wait.h>
 
 void splitString(std::string text, char d, std::vector<std::string>& result);
 void vectorOfStringsToArrayOfCharArrays(std::vector<std::string>& list, char ***result);
@@ -54,37 +55,84 @@ int main (int argc, char **argv)
 
     //std::system("ls");
     namespace fs = std::filesystem;
-    
+    std::vector<std::string> userHistoryVec;
+    int index = 0;
     while(true)
     {
         std::string command;
         std::cout << "osshell> ";
         std::getline(std::cin, command);
-        if(command.compare("exit") == 0)
-        {
-            break;
-        }
-        bool isValid = false;
-        int j;
-        for (j = 0; j < os_path_list.size(); j++)
-        {   
-            std::string path = os_path_list[j];
-            std::string lsPath = path + "/" + command;
-            if (fs::exists(lsPath)==1)
+        splitString(command, ' ', command_list);
+        vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
+        if(command.compare("")== 0){
+
+        } else {
+            userHistoryVec.push_back(command);
+            if(command.compare("exit") == 0)
+            {
+                break;
+            }
+            if (command_list[0].compare("history")==0)
+            {
+                char **userHistory;
+                vectorOfStringsToArrayOfCharArrays(userHistoryVec,&userHistory);
+                int historySize = userHistoryVec.size();
+                if(command_list.size()>1 && command_list[1].compare("clear")==0)
+                {
+
+                    userHistoryVec.clear();
+                    freeArrayOfCharArrays(userHistory,historySize);
+                }
+                else {
+                    int j;
+                    for (j = 0; j<historySize-1; j++){
+                        printf("%d: %s\n", j+1, userHistory[j]);
+                    }
+                }
+                
+            }
+            else {
+            
+            index++;
+            bool isValid = false;
+            int j;
+            std::string commandPath;
+            for (j = 0; j < os_path_list.size(); j++)
+            {   
+                std::string path = os_path_list[j];
+                std::string exPath = path + "/" + command_list_exec[0];
+                if (fs::exists(exPath)==1)
             {
                 isValid = true;
+                commandPath = exPath;
             }
+            }
+            const char * commandConChar = command.c_str();
+            const char * commandPathChar = commandPath.c_str();
+            if (isValid)
+            {
+
+                int child = fork();
+                if (child == 0){
+                    execv(commandPathChar,command_list_exec);
+                } else {
+                    int status;
+                    waitpid(child, &status, 0);
+                }
+            
+                freeArrayOfCharArrays(command_list_exec, command_list.size() + 1);
+            
+            } 
+            else
+            {
+                std::cout << command;
+                std::cout << ": Error command not found\n";
+            }
+            }
+
         }
-        const char * commandConChar = command.c_str();
-        if (isValid)
-        {
-            std::system(commandConChar);
-        } 
-        else
-        {
-            std::cout << command;
-            std::cout << ": Error command not found\n";
-        }
+
+
 
     }
     
