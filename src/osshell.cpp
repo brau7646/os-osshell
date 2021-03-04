@@ -67,6 +67,10 @@ int main (int argc, char **argv)
         if(command.compare("")== 0){
 
         } else {
+            if(userHistoryVec.size()==129)
+            {
+                userHistoryVec.erase(userHistoryVec.begin());
+            }
             userHistoryVec.push_back(command);
             if(command.compare("exit") == 0)
             {
@@ -83,7 +87,32 @@ int main (int argc, char **argv)
                     userHistoryVec.clear();
                     freeArrayOfCharArrays(userHistory,historySize);
                 }
-                else {
+                else if(command_list.size()>1)
+                {
+                    bool isInt = true;
+                    char argInt[command_list[1].size()];
+                    int j;
+                    for (j=0; j<command_list[1].size();j++)
+                    {
+                        if (!isdigit(command_list[1][j]))
+                        {
+                            isInt = false;
+                        }
+                        argInt[j]=command_list[1][j];
+                    }
+                    if (isInt && atoi(argInt) > 0)
+                    {
+                        int start = atoi(argInt) + 1;
+                        for (j = historySize-start; j<historySize-1; j++){
+                            printf("%d: %s\n", j+1, userHistory[j]);
+                        }
+                    }
+                    else 
+                    {
+                        printf("Error: history expects an integer > 0 (or 'clear')\n");
+                    }
+                }
+                else if (command_list.size()==1) {
                     int j;
                     for (j = 0; j<historySize-1; j++){
                         printf("%d: %s\n", j+1, userHistory[j]);
