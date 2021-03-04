@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <iostream>
 #include <cstdlib>
 #include <string>
@@ -21,24 +22,8 @@ int main (int argc, char **argv)
     char* os_path = getenv("PATH");
     splitString(os_path, ':', os_path_list);
 
-    
-    /************************************************************************************
-     *   Example code - remove in actual program                                        *
-     ************************************************************************************/
-    // Shows how to loop over the directories in the PATH environment variable
-    
     int i;
-    /*
-    for (i = 0; i < os_path_list.size(); i++)
-    {
-        printf("PATH[%2d]: %s\n", i, os_path_list[i].c_str());
-    }
-    */
-    /************************************************************************************
-     *   End example code                                                               *
-     ************************************************************************************/
-
-
+    
     // Welcome message
     printf("Welcome to OSShell! Please enter your commands ('exit' to quit).\n");
 
@@ -53,10 +38,23 @@ int main (int argc, char **argv)
     //   If yes, execute it
     //   If no, print error statement: "<command_name>: Error command not found" (do include newline)
 
-    //std::system("ls");
     namespace fs = std::filesystem;
     std::vector<std::string> userHistoryVec;
-    int index = 0;
+    std::string temp;
+    FILE *history;
+
+    history = fopen("./history.txt", "a+");
+    char line[2000];
+
+    while ( fgets(line, sizeof(line), history))
+    {
+        temp.assign(line);
+        temp.pop_back();
+        userHistoryVec.push_back(temp.c_str());
+    }
+    fclose(history);
+
+
     while(true)
     {
         std::string command;
@@ -67,6 +65,7 @@ int main (int argc, char **argv)
         if(command.compare("")== 0){
 
         } else {
+            char **userHistory;
             if(userHistoryVec.size()==129)
             {
                 userHistoryVec.erase(userHistoryVec.begin());
@@ -74,11 +73,21 @@ int main (int argc, char **argv)
             userHistoryVec.push_back(command);
             if(command.compare("exit") == 0)
             {
+                vectorOfStringsToArrayOfCharArrays(userHistoryVec,&userHistory);
+                int historySize = userHistoryVec.size();
+                std::string cmd;
+                history = fopen("./history.txt", "w+");
+                for(int j=0; j<historySize; j++)
+                {
+                    cmd.assign(userHistory[j]);
+                    cmd.append("\n");
+                    fputs(cmd.c_str(), history);
+                }
+                fclose(history);
                 break;
             }
             if (command_list[0].compare("history")==0)
             {
-                char **userHistory;
                 vectorOfStringsToArrayOfCharArrays(userHistoryVec,&userHistory);
                 int historySize = userHistoryVec.size();
                 if(command_list.size()>1 && command_list[1].compare("clear")==0)
@@ -122,19 +131,40 @@ int main (int argc, char **argv)
             }
             else {
             
-            index++;
             bool isValid = false;
+            bool lenCheck = false;
             int j;
             std::string commandPath;
-            for (j = 0; j < os_path_list.size(); j++)
-            {   
-                std::string path = os_path_list[j];
-                std::string exPath = path + "/" + command_list_exec[0];
-                if (fs::exists(exPath)==1)
+
+            //this section implments the '.' and '/' commands
+
+            if(strlen(command_list_exec[0])>=1)
             {
-                isValid = true;
-                commandPath = exPath;
+                lenCheck=true;
             }
+
+            if(lenCheck && (command_list_exec[0][0] == '.' || command_list_exec[0][0] == '/'))
+                {
+                    if(fs::exists(command_list_exec[0])==1)
+                    {
+                        isValid=true;
+                        commandPath = command_list_exec[0];
+                    }
+                }
+            //
+            else
+            {
+
+                for (j = 0; j < os_path_list.size(); j++)
+                {   
+                    std::string path = os_path_list[j];
+                    std::string exPath = path + "/" + command_list_exec[0];
+                    if (fs::exists(exPath)==1)
+                    {
+                        isValid = true;
+                        commandPath = exPath;
+                    }
+                }
             }
             const char * commandConChar = command.c_str();
             const char * commandPathChar = commandPath.c_str();
@@ -165,43 +195,6 @@ int main (int argc, char **argv)
 
     }
     
-    
-    /************************************************************************************
-     *   Example code - remove in actual program                                        *
-     ************************************************************************************/
-    // Shows how to split a command and prepare for the execv() function
-    std::string example_command = "ls -lh";
-    splitString(example_command, ' ', command_list);
-    vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
-    // use `command_list_exec` in the execv() function rather than looping and printing
-    i = 0;
-    while (command_list_exec[i] != NULL)
-    {
-        printf("CMD[%2d]: %s\n", i, command_list_exec[i]);
-        i++;
-    }
-    // free memory for `command_list_exec`
-    freeArrayOfCharArrays(command_list_exec, command_list.size() + 1);
-    printf("------\n");
-
-    // Second example command - reuse the `command_list` and `command_list_exec` variables
-    example_command = "echo \"Hello world\" I am alive!";
-    splitString(example_command, ' ', command_list);
-    vectorOfStringsToArrayOfCharArrays(command_list, &command_list_exec);
-    // use `command_list_exec` in the execv() function rather than looping and printing
-    i = 0;
-    while (command_list_exec[i] != NULL)
-    {
-        printf("CMD[%2d]: %s\n", i, command_list_exec[i]);
-        i++;
-    }
-    // free memory for `command_list_exec`
-    freeArrayOfCharArrays(command_list_exec, command_list.size() + 1);
-    printf("------\n");
-    /************************************************************************************
-     *   End example code                                                               *
-     ************************************************************************************/
-
 
     return 0;
 }

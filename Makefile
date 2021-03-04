@@ -1,5 +1,5 @@
 CXX= g++
-CXXFLAGS= -std=c++11
+CXXFLAGS= -std=c++17
 
 INCLUDE= 
 LIB= 
@@ -14,7 +14,7 @@ EXEC= $(addprefix $(BINDIR)/, osshell)
 mkdirs:= $(shell mkdir -p $(OBJDIR) $(BINDIR))
 
 # BUILD EVERYTHING
-all: $(EXEC)
+all:$(EXEC)
 
 $(EXEC): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIB)
